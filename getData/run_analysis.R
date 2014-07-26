@@ -51,6 +51,44 @@ fullLabel <- c(trainLabel$Activity, testLabel$Activity)
 
 ## Now the third step:
 ## "Uses descriptive activity names to name the activities in the data set."
-meanStdSet <- cbind(Activity=fullLabel, meanStdSet)
+meanStdSet <- cbind(Activity=fullLabel, meanStdSet, stringsAsFactors=FALSE)
 
+## Now the fourth step:
+## "Appropriately labels the data set with descriptive variable names."
+
+# Change variable names into more meaningful ones.
+# e.g.) "tGravityAcc-mean()-X" becomes
+#       "timeGravityAccelerometerMeanXaxis"
+names(meanStdSet) <- gsub("^t", "time", names(meanStdSet))
+names(meanStdSet) <- gsub("^f", "frequency", names(meanStdSet))
+names(meanStdSet) <- gsub("Acc", "Accelerometer", names(meanStdSet))
+names(meanStdSet) <- gsub("Gyro", "Gyroscope", names(meanStdSet))
+names(meanStdSet) <- gsub("Mag", "Magnitude", names(meanStdSet))
+names(meanStdSet) <- gsub("-mean\\(\\)", "Mean", names(meanStdSet))
+names(meanStdSet) <- gsub("-std\\(\\)", "StandardDeviation", names(meanStdSet))
+names(meanStdSet) <- gsub("-X", "Xaxis", names(meanStdSet))
+names(meanStdSet) <- gsub("-Y", "Yaxis", names(meanStdSet))
+names(meanStdSet) <- gsub("-Z", "Zaxis", names(meanStdSet))
+
+# Read subject data
+trainSubject <- read.table("./data/UCI HAR Dataset/train/subject_train.txt", stringsAsFactors=FALSE)
+testSubject <- read.table("./data/UCI HAR Dataset/test/subject_test.txt", stringsAsFactors=FALSE)
+names(trainSubject) <- c("SubjectID")
+names(testSubject) <- c("SubjectID")
+
+fullSubject <- c(trainSubject$SubjectID, testSubject$SubjectID)
+
+# Make an independent data set with subject data
+tidySet <- cbind(SubjectID=fullSubject, meanStdSet, stringsAsFactors=FALSE)
+
+## Now the fifth (the last!) step:
+## "Creates a second, independent tidy data set with the average of each variable for each activity and each subject."
+tidySet <- aggregate(.~SubjectID+Activity, data=tidySet, FUN=mean)
+tidySet <- tidySet[with(tidySet, order(SubjectID, Activity)),]
+row.names(tidySet) <- NULL
+
+## Now save the result to a csv file.
+write.table(tidySet, file="tidySet.csv", sep=",", row.names=FALSE)
+
+## NOW EVERYTHING IS DONE!!
 
