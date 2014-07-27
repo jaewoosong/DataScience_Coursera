@@ -1,13 +1,17 @@
 # Coursera: Getting and Cleaning Data
 ## Course Project
 
-It is easy to run this R script.
+* This R script analyzes the data from http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
 
-Just run **run_analysis.R** on your computer!
+* The data are about wearable computing, and are from the accelerometers from the Samsung Galaxy S smartphone.
 
-It will download the necessary file(s) from the internet.
+* It is easy to run this R script.
 
-Then it will generate **tidySet.csv**, which is a *tidy* summary of the raw data.
+  - Just run **run_analysis.R** on your computer!
+
+  - It will download the necessary file(s) from the internet.
+
+  - Then it will generate **tidySet.csv**, which is a *tidy* summary of the raw data.
 
 In detail:
 
