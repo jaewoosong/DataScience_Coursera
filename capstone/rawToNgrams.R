@@ -1,23 +1,32 @@
 library(stringi)
 source("./func.R")
 
-con <- file("rawdata_2014/en_US.twitter.txt", "r")
-x0 <- readLines(con, 5)
+# twitter: 2,360,000 lines (approx)
+# blog:
+# news:
+
+con <- file("rawdata/en_US.twitter.txt", "r")
+raw <- readLines(con, 100000)
+# 10000 approx. 1 minute
+# 100000 approx. 6 minutes
+raw <- iconv(raw,"WINDOWS-1252","ASCII", sub="")
 close(con)
 
-x1 <- tolower(x0)
-x2 <- gsub("[^[:alnum:][:space:]']", " ", x1)
-x3 <- gsub("( )+", " ", x2)
-# x4 <- strsplit(x3, " ")
+raw2 <- gsub("[^[:alnum:][:space:]']", " ", tolower(raw))
+clean <- gsub("[[:space:]]+", " ", raw2)
 
-gram1 <- ngram_tokenizer(n=1)
-gram2 <- ngram_tokenizer(n=2)
-gram3 <- ngram_tokenizer(n=3)
+gram1func <- ngram_tokenizer(n=1)
+gram2func <- ngram_tokenizer(n=2)
+gram3func <- ngram_tokenizer(n=3)
 
-g1 <- gram1(x3[1])
-g2 <- gram2(x3[1])
-g3 <- gram3(x3[1])
+g1 <- gram1func(clean)
+g2 <- gram2func(clean)
+g3 <- gram3func(clean)
 
-table(g1)
-table(g2)
-table(g3)
+g1df <- as.data.frame(table(g1))
+g2df <- as.data.frame(table(g2))
+g3df <- as.data.frame(table(g3))
+
+g1sort <- g1df[with(g1df, order(-Freq)),]
+g2sort <- g2df[with(g2df, order(-Freq)),]
+g3sort <- g3df[with(g3df, order(-Freq)),]
