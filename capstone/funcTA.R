@@ -1,4 +1,6 @@
-#' Ngrams tokenizer
+library(stringi)
+
+#' Ngrams tokenizer (community TA wrote this code)
 #' @param n integer
 #' @return n-gram tokenizer function
 ngram_tokenizer <- function(n = 1L, skip_word_none = TRUE) {

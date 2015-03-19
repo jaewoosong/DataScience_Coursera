@@ -1,12 +1,12 @@
-library(stringi)
-source("./func.R")
+source("./funcTA.R")
+source("./funcMe.R")
 
 # twitter: 2,360,000 lines (approx)
 # blog:
 # news:
 
 con <- file("rawdata/en_US.twitter.txt", "r")
-raw <- readLines(con, 100000)
+raw <- readLines(con, 1000)
 # 10000 approx. 1 minute
 # 100000 approx. 6 minutes
 raw <- iconv(raw,"WINDOWS-1252","ASCII", sub="")
@@ -23,10 +23,14 @@ g1 <- gram1func(clean)
 g2 <- gram2func(clean)
 g3 <- gram3func(clean)
 
-g1df <- as.data.frame(table(g1))
-g2df <- as.data.frame(table(g2))
-g3df <- as.data.frame(table(g3))
+g1.df <- as.data.frame(table(g1), stringsAsFactors=FALSE)
+g2.df <- as.data.frame(table(g2), stringsAsFactors=FALSE)
+g3.df <- as.data.frame(table(g3), stringsAsFactors=FALSE)
 
-g1sort <- g1df[with(g1df, order(-Freq)),]
-g2sort <- g2df[with(g2df, order(-Freq)),]
-g3sort <- g3df[with(g3df, order(-Freq)),]
+colnames(g1.df) <- c("Ngram", "Freq")
+colnames(g2.df) <- c("Ngram", "Freq")
+colnames(g3.df) <- c("Ngram", "Freq")
+
+g1.df.sort <- g1.df[with(g1.df, order(-Freq)),]
+g2.df.sort <- g2.df[with(g2.df, order(-Freq)),]
+g3.df.sort <- g3.df[with(g3.df, order(-Freq)),]
