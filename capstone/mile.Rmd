@@ -1,0 +1,121 @@
+---
+title: "JHU & Coursera Data Science Specialization: Milestone Report"
+author: "Jaewoo Song"
+date: "Sunday, March 29, 2015"
+output: html_document
+---
+
+## Basic Summaries
+Lines and words of the three files were counted. All appeared words were counted individually: i.e., "hi hi hi" resulted three word counts.
+
+```{r, echo=FALSE, cache=TRUE, cache.path="./savedata/knitrCache.data"}
+load("./savedata/cleanedFullData.Rsaved")
+line.b <- length(cleaned.blogs)
+line.n <- length(cleaned.news)
+line.t <- length(cleaned.twitter)
+summary <- as.data.frame(c(line.b, line.n, line.t,
+                           sum(line.b, line.n, line.t)),
+                         row.names=c("blogs", "news",
+                                     "twitter", "total"))
+names(summary) <- c("Line.Counts")
+
+word.b <- 0
+word.n <- 0
+word.t <- 0
+for(i in c(1:line.b)) {
+  word.b <- word.b + length(strsplit(cleaned.blogs[i], split=" ")[[1]])
+}
+for(i in c(1:line.n)) {
+  word.n <- word.n + length(strsplit(cleaned.news[i], split=" ")[[1]])
+}
+for(i in c(1:line.t)) {
+  word.t <- word.t + length(strsplit(cleaned.twitter[i], split=" ")[[1]])
+}
+summary$Word.Counts <- c(word.b, word.n, word.t,
+                         sum(word.b, word.n, word.t))
+```
+
+```{r}
+summary
+```
+
+## Data Sampling
+1% of each data set were extracted for further analysis.
+```{r, cache=TRUE, cache.path="./savedata/knitrCache2.data"}
+set.seed(1225)
+sample.b.num <- rbinom(line.b, 1, 0.01)
+sample.n.num <- rbinom(line.n, 1, 0.01)
+sample.t.num <- rbinom(line.t, 1, 0.01)
+
+sample.b <- cleaned.blogs[sample.b.num == 1]
+sample.n <- cleaned.news[sample.n.num == 1]
+sample.t <- cleaned.twitter[sample.t.num == 1]
+```
+
+## Analysis
+```{r, echo=FALSE, cache=TRUE, cache.path="./savedata/knitrCache3.data"}
+ngram_tokenizer <- function(n = 1L, skip_word_none = TRUE) {
+  stopifnot(is.numeric(n), is.finite(n), n > 0)
+  options <- stringi::stri_opts_brkiter(type="word", skip_word_none = skip_word_none)
+  function(x) {
+    stopifnot(is.character(x))
+    
+    # Split into word tokens
+    tokens <- unlist(stringi::stri_split_boundaries(x, opts_brkiter=options))
+    len <- length(tokens)
+    if(all(is.na(tokens)) || len < n) {
+      # If we didn't detect any words or number of tokens is less than n return empty vector
+      character(0)
+    } else {
+      sapply(1:max(1, len - n + 1),
+             function(i) stringi::stri_join(tokens[i:min(len, i + n - 1)], collapse = " "))
+    }
+  }
+}
+
+tokens <- (ngram_tokenizer(n=1))(c(sample.b, sample.n, sample.t))
+tokens.df <- as.data.frame(table(tokens), stringsAsFactors=FALSE)
+colnames(tokens.df) <- c("Token", "Freq")
+tokens.df <- tokens.df[with(tokens.df, order(-Freq)),]
+```
+
+### Most frequent words
+The mean of the frequencies was 12.89 and the standard deviation was 189.99. Words which appeared more than three standard deviations above the average (580 times) were defined to be `frequent' in this report. There were 71 most frequent words.
+```{r, echo=FALSE}
+mean.tok <- mean(tokens.df$Freq)
+sd.tok <- sd(tokens.df$Freq)
+tokens.df[tokens.df$Freq > mean.tok + 3 * sd.tok, ]$Token
+```
+
+### Less than 10 percent of words appeared more than average
+2844 words appeared more than average (12.89) times. Because there were total 28819 words, only 9.87\% of total words appeared more than average times.
+
+### But they covered 86.6\% of total word frequencies
+Those 9.87\% of total words covered 86.6\% of total word frequencies. In other words, only about 10\% of total vocabularies will be enough for fairly good prediction.
+```{r}
+sum(tokens.df$Freq[tokens.df$Freq >= mean.tok]) / sum(tokens.df$Freq)
+```
+
+### Histogram of Word Frequencies
+Logarithmic scale with base 10 was used on the X axis to make the histogram visually more meaningful. Average word frequency was marked by a red dotted line. Right side of the blue dotted line is 71 most frequent words. It is clearly shown that majority of words appeared less than average.
+```{r, echo=FALSE}
+hist(log10(tokens.df$Freq), main="Log of Word Frequencies",
+     xlab="Frequency of words (log with base 10)",
+     ylab="No. of such words")
+abline(v=log10(mean(tokens.df$Freq)), col=2, lty=5)
+abline(v=log10(mean(tokens.df$Freq) + 3*sd(tokens.df$Freq)),
+       col=4, lty=5)
+```
+
+### Histogram of Word Frequencies 2: more than average
+For further inspection only the words which appeared more than average were shown in this histogram. These words cover 86.6\% of total word usages. Again logarithm with base 10 was used on the X axis, and the blue line represents the beginning of 71 most frequent words.
+```{r, echo=FALSE}
+hist(log10(tokens.df$Freq[tokens.df$Freq > mean(tokens.df$Freq)]), main="Log of Word Frequencies (above average)",
+     xlab="Frequency of words (log with base 10)",
+     ylab="No. of such words")
+abline(v=log10(mean(tokens.df$Freq) + 3*sd(tokens.df$Freq)),
+       col=4, lty=5)
+```
+
+## Future Plan
+I will use 2-grams and 3-grams to make a prediction model. Katz's back-off model will be an underlying mathematical theory. Currently I am coding Good-Turing frequency estimation because it is a part of Katz's back-off model. I hope make a shiny app which gets an unfinished sentence as an input and prints the next word as an output.

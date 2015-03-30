@@ -5,6 +5,7 @@ source("./funcMe.R")
 # blog:
 # news:
 
+# rb instead of r?
 con <- file("rawdata/en_US.twitter.txt", "r")
 raw <- readLines(con, 1000)
 # 10000 approx. 1 minute
