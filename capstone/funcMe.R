@@ -87,3 +87,11 @@ basicSummary1 <- function(x) {
   clean
 }
 
+quiz2 <- function(x) {
+  cat(length(grep(x, cleaned.blogs)))
+  cat("\n")
+  cat(length(grep(x, cleaned.news)))
+  cat("\n")
+  cat(length(grep(x, cleaned.twitter)))
+  cat("\n")
+}
